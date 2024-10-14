@@ -198,13 +198,14 @@ class LeaderboardEvaluator(object):
         """
         Prepares the simulation by getting the client, and setting up the world and traffic manager settings
         """
+        gpu_rank = {0:3, 1:4, 2:2, 3:0, 4:7, 5:8, 6:6, 7:5}
         self.carla_path = os.environ["CARLA_ROOT"]
         args.port = find_free_port(args.port)
-        cmd1 = f"{os.path.join(self.carla_path, 'CarlaUE4.sh')} -RenderOffScreen -nosound -carla-rpc-port={args.port} -graphicsadapter={args.gpu_rank}"
+        cmd1 = f"{os.path.join(self.carla_path, 'CarlaUE4.sh')} -RenderOffScreen -nosound -carla-rpc-port={args.port} -graphicsadapter={gpu_rank[args.gpu_rank]}"
         self.server = subprocess.Popen(cmd1, shell=True, preexec_fn=os.setsid)
         print(cmd1, self.server.returncode, flush=True)
         atexit.register(os.killpg, self.server.pid, signal.SIGKILL)
-        time.sleep(30)
+        time.sleep(60)
             
         attempts = 0
         num_max_restarts = 20
@@ -359,6 +360,7 @@ class LeaderboardEvaluator(object):
                 self._ros1_server.start()
 
             self.agent_instance = agent_class_obj(args.host, args.port, args.debug)
+            self.agent_instance.town_name = config.town
             self.agent_instance.set_global_plan(self.route_scenario.gps_route, self.route_scenario.route)
             args.agent_config = args.agent_config + '+' + save_name
             self.agent_instance.setup(args.agent_config)

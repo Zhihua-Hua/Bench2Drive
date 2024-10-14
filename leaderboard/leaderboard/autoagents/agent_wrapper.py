@@ -101,7 +101,7 @@ def validate_sensor_configuration(sensors, agent_track, selected_track):
             raise SensorConfigurationInvalid("Illegal sensor '{}' used for Track [{}]!".format(sensor['type'], agent_track))
 
         # Check the extrinsics of the sensor
-        if 'x' in sensor and 'y' in sensor and 'z' in sensor:
+        if 'x' in sensor and 'y' in sensor and 'z' in sensor and sensor_id != 'bev':
             if math.sqrt(sensor['x']**2 + sensor['y']**2 + sensor['z']**2) > MAX_ALLOWED_RADIUS_SENSOR:
                 raise SensorConfigurationInvalid(
                     "Illegal sensor extrinsics used for sensor '{}'. Max allowed radius is {}m".format(sensor['id'], MAX_ALLOWED_RADIUS_SENSOR))
