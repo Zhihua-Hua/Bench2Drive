@@ -110,9 +110,15 @@ class GlobalRoutePlanner(object):
                 w = wp1.next(self._sampling_resolution)[0]
                 while w.transform.location.distance(endloc) > self._sampling_resolution:
                     seg_dict['path'].append(w)
-                    w = w.next(self._sampling_resolution)[0]
+                    try: 
+                        w = w.next(self._sampling_resolution)[0]
+                    except:
+                        break
             else:
-                seg_dict['path'].append(wp1.next(self._sampling_resolution)[0])
+                try: 
+                    seg_dict['path'].append(wp1.next(self._sampling_resolution)[0])
+                except:
+                    pass
             self._topology.append(seg_dict)
 
     def _build_graph(self):

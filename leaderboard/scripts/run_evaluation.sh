@@ -1,6 +1,6 @@
 #!/bin/bash
 # Must set CARLA_ROOT
-export CARLA_ROOT=YOUR_CARLA_PATH
+export CARLA_ROOT=/data/huazh/Bench2Drive/carla
 export CARLA_SERVER=${CARLA_ROOT}/CarlaUE4.sh
 export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI
 export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla
@@ -28,7 +28,7 @@ export TEAM_CONFIG=$6
 export CHECKPOINT_ENDPOINT=$7
 export SAVE_PATH=$8
 
-CUDA_VISIBLE_DEVICES=${GPU_RANK} python ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py \
+CUDA_VISIBLE_DEVICES=${GPU_RANK} python -u ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py \
 --routes=${ROUTES} \
 --repetitions=${REPETITIONS} \
 --track=${CHALLENGE_TRACK_CODENAME} \

@@ -23,6 +23,17 @@ import sys
 import carla
 import signal
 
+sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/scenario_runner")
+sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/scenario_runner/srunner/tests/carla_mocks")
+sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/leaderboard")
+sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/leaderboard/team_code")
+# sys.path.append("/data/huazh/Bench2Drive/Bench2Drive")
+# sys.path.append("/data/huazh/Bench2Drive")
+
+sys.path.append('/data/huazh/Bench2Drive/carla/PythonAPI')
+sys.path.append('/data/huazh/Bench2Drive/carla/PythonAPI/carla')
+sys.path.append('/data/huazh/Bench2Drive/carla/PythonAPI/carla/dist/carla-0.9.15-py3.7-linux-x86_64.egg')
+
 from srunner.scenariomanager.carla_data_provider import *
 from srunner.scenariomanager.timer import GameTime
 from srunner.scenariomanager.watchdog import Watchdog
@@ -38,6 +49,12 @@ import subprocess
 import time
 import random
 from datetime import datetime
+
+print('temp')
+import debugpy
+print('waiting for debugger...')
+debugpy.listen(1991)
+debugpy.wait_for_client()
 
 sensors_to_icons = {
     'sensor.camera.rgb':        'carla_camera',
@@ -523,7 +540,7 @@ def main():
                         help='Run with debug output', default=0)
     parser.add_argument('--record', type=str, default='',
                         help='Use CARLA recording feature to create a recording of the scenario')
-    parser.add_argument('--timeout', default=600.0, type=float,
+    parser.add_argument('--timeout', default=3600.0, type=float,
                         help='Set the CARLA client timeout value in seconds')
 
     # simulation setup
