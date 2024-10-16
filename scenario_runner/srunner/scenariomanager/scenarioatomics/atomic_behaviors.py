@@ -30,7 +30,7 @@ import networkx
 
 import carla
 from agents.navigation.basic_agent import BasicAgent
-# from agents.navigation.constant_velocity_agent import ConstantVelocityAgent
+from agents.navigation.constant_velocity_agent import ConstantVelocityAgent
 from agents.navigation.local_planner import RoadOption, LocalPlanner
 from agents.tools.misc import is_within_distance, get_speed
 

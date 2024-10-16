@@ -23,6 +23,13 @@ import sys
 import carla
 import signal
 
+# import logging
+# logging.basicConfig(
+#     level=logging.DEBUG,  # 设置日志级别为DEBUG，这样会输出所有级别的日志
+#     format='%(asctime)s - %(levelname)s - %(message)s'  # 定义日志格式
+# )
+
+
 sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/scenario_runner")
 sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/scenario_runner/srunner/tests/carla_mocks")
 sys.path.append("/data/huazh/Bench2Drive/Bench2Drive/leaderboard")
@@ -50,11 +57,10 @@ import time
 import random
 from datetime import datetime
 
-print('temp')
-import debugpy
-print('waiting for debugger...')
-debugpy.listen(1991)
-debugpy.wait_for_client()
+# import debugpy
+# print('waiting for debugger...', flush=True)
+# debugpy.listen(1991)
+# debugpy.wait_for_client()
 
 sensors_to_icons = {
     'sensor.camera.rgb':        'carla_camera',
@@ -215,7 +221,7 @@ class LeaderboardEvaluator(object):
         """
         Prepares the simulation by getting the client, and setting up the world and traffic manager settings
         """
-        gpu_rank = {0:3, 1:4, 2:2, 3:0, 4:7, 5:8, 6:6, 7:5}
+        gpu_rank = {0:3, 1:4, 2:2, 3:0, 4:1, 5:5, 6:6, 7:7}
         self.carla_path = os.environ["CARLA_ROOT"]
         args.port = find_free_port(args.port)
         cmd1 = f"{os.path.join(self.carla_path, 'CarlaUE4.sh')} -RenderOffScreen -nosound -carla-rpc-port={args.port} -graphicsadapter={gpu_rank[args.gpu_rank]}"
@@ -333,7 +339,7 @@ class LeaderboardEvaluator(object):
 
         print("\n\033[1m========= Preparing {} (repetition {}) =========\033[0m".format(config.name, config.repetition_index), flush=True)
 
-        # Prepare the statistics of the route
+        # ======= Prepare the statistics of the route =======
         route_name = f"{config.name}_rep{config.repetition_index}"
         scenario_name = config.scenario_configs[0].name
         town_name = str(config.town)
@@ -345,10 +351,10 @@ class LeaderboardEvaluator(object):
 
         print("\033[1m> Loading the world\033[0m", flush=True)
 
-        # Load the world and the scenario
+        # ======= Load the world and the scenario =======
         try:
             self._load_and_wait_for_world(args, config.town)
-            self.route_scenario = RouteScenario(world=self.world, config=config, debug_mode=args.debug)
+            self.route_scenario = RouteScenario(world=self.world, config=config, debug_mode=args.debug)   # 设置route_scenario
             self.statistics_manager.set_scenario(self.route_scenario)
 
         except Exception:
@@ -363,7 +369,7 @@ class LeaderboardEvaluator(object):
 
         print("\033[1m> Setting up the agent\033[0m", flush=True)
 
-        # Set up the user's agent, and the timer to avoid freezing the simulation
+        # ======= Set up the user's agent, and the timer to avoid freezing the simulation =======
         try:
             self._agent_watchdog = Watchdog(args.timeout)
             self._agent_watchdog.start()
@@ -378,7 +384,7 @@ class LeaderboardEvaluator(object):
 
             self.agent_instance = agent_class_obj(args.host, args.port, args.debug)
             self.agent_instance.town_name = config.town
-            self.agent_instance.set_global_plan(self.route_scenario.gps_route, self.route_scenario.route)
+            self.agent_instance.set_global_plan(self.route_scenario.gps_route, self.route_scenario.route)    # 预定义GPS route
             args.agent_config = args.agent_config + '+' + save_name
             self.agent_instance.setup(args.agent_config)
 
@@ -421,7 +427,7 @@ class LeaderboardEvaluator(object):
 
         print("\033[1m> Running the route\033[0m", flush=True)
 
-        # Run the scenario
+        # ======= Run the scenario =======
         try:
             # Load scenario and run it
             if args.record:
