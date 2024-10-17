@@ -222,7 +222,9 @@ class LeaderboardEvaluator(object):
         Prepares the simulation by getting the client, and setting up the world and traffic manager settings
         """
         # 41 gpu ranks = {0:3, 1:4, 2:2, 3:0, 4:7, 5:8, 6:6, 7:5}
-        gpu_rank = {0:3, 1:4, 2:2, 3:0, 4:7, 5:8, 6:6, 7:5}
+        # 9 gpu_ranks = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7}
+        # 11 gpu_ranks = 0->4, 
+        gpu_rank = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7}
         self.carla_path = os.environ["CARLA_ROOT"]
         args.port = find_free_port(args.port)
         cmd1 = f"{os.path.join(self.carla_path, 'CarlaUE4.sh')} -RenderOffScreen -nosound -carla-rpc-port={args.port} -graphicsadapter={gpu_rank[args.gpu_rank]}"
