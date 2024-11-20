@@ -3,6 +3,11 @@ import glob
 import argparse
 import os
 
+# import debugpy
+# print('waiting for debugger...')
+# debugpy.listen(1991)
+# debugpy.wait_for_client()
+
 def merge_route_json(folder_path):
     file_paths = glob.glob(f'{folder_path}/*.json')
     merged_records = []
@@ -35,8 +40,8 @@ def merge_route_json(folder_path):
 
     merged_data = {
         "_checkpoint": _checkpoint,
-        "driving score": sum(driving_score) / 220,
-        "success rate": success_num / 220,
+        "driving score": sum(driving_score) / len(driving_score),
+        "success rate": success_num / len(driving_score),
         "eval num": len(driving_score),
     }
 
