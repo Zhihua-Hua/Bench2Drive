@@ -183,20 +183,7 @@ class AblationAgent():
         legend_dict = {'navi': (50, 50), 'pred': (50, 100)}
         rgb_color_tuple = color_dict[type]
         traj_type = 'navigation_points' if type=='navi' else 'planning_trajectory'
-        if is_ego:
-            line = np.concatenate([np.zeros((1,2)),meta[traj_type]],axis=0)
-            # line = np.array(meta['planning_trajectory'])
-        else:
-            line = meta[traj_type]
-
-        # # 
-        # if pred_frame is not None:
-        #     traj = np.zeros((9, 2))
-        #     traj = pred_frame*0.5 + line*0.5
-        # else:
-        #     traj = line
-            
-        # pred_frame = traj
+        line = np.array(meta[traj_type][:6])
 
         coor2topdown = np.array([[1.0,  0.0,  0.0,  0.0], 
                                 [0.0, -1.0,  0.0,  3.900000e-01], 
@@ -250,68 +237,56 @@ class AblationAgent():
                 break
         return img
     
-    # def draw_traj_bev(self, traj, raw_img, meta, canvas_size=(1024,1024),thickness=3,is_ego=False, type='navi'):
-    #     color_dict = {'navi': (51, 136, 255), 'pred': (255, 165, 0)}
-    #     legend_dict = {'navi': (50, 50), 'pred': (50, 100)}
-    #     rgb_color_tuple = color_dict[type]
-    #     if is_ego:
-    #         line = np.concatenate([np.zeros((1,2)),traj],axis=0)
-    #         line = np.array(traj)
-    #     else:
-    #         line = traj
+    def draw_spline_bev(self, meta, raw_img, canvas_size=(1024,1024),thickness=3,is_ego=False, type='navi', pred_frame=None, hue_start=120,hue_end=80):
+        color_dict = {'navi': (51, 136, 255), 'pred': (255, 165, 0)}
+        legend_dict = {'navi': (50, 50), 'pred': (50, 100)}
+        rgb_color_tuple = color_dict[type]
+        traj_type = 'navigation_points' if type=='navi' else 'planning_trajectory'
 
-    #     coor2topdown = np.array([[1.0,  0.0,  0.0,  0.0], 
-    #                             [0.0, -1.0,  0.0,  3.900000e-01], 
-    #                             [0.0,  0.0, -1.0, 4.816000e+01], 
-    #                             [0.0,  0.0,  0.0,  1.0]])
-    #     topdown_intrinsics = np.array([[1097.987543300894, 0.0, 512.0, 0], 
-    #                                 [0.0, 1097.987543300894, 512.0, 0], 
-    #                                 [0.0, 0.0, 1.0, 0], 
-    #                                 [0, 0, 0, 1.0]])
-    #     coor2topdown = np.dot(topdown_intrinsics, coor2topdown)
+        line = np.array(meta[traj_type][:6])
 
-    #     img = raw_img.copy()        
-    #     pts_4d = np.stack([line[:,0],line[:,1],np.zeros(line.shape[0]),np.ones(line.shape[0])])
-    #     pts_2d = (coor2topdown @ pts_4d).T
-    #     pts_2d[:, 0] /= pts_2d[:, 2]
-    #     pts_2d[:, 1] /= pts_2d[:, 2]
-    #     mask = (pts_2d[:, 0]>0) & (pts_2d[:, 0]<canvas_size[1]) & (pts_2d[:, 1]>0) & (pts_2d[:, 1]<canvas_size[0])
-    #     if not mask.any():
-    #         return img
+        coor2topdown = np.array([[1.0,  0.0,  0.0,  0.0], 
+                                [0.0, -1.0,  0.0,  3.900000e-01], 
+                                [0.0,  0.0, -1.0, 4.816000e+01], 
+                                [0.0,  0.0,  0.0,  1.0]])
+        # topdown_intrinsics = np.array([[1097.987543300894, 0.0, 512.0, 0], 
+        #                             [0.0, 1097.987543300894, 512.0, 0], 
+        #                             [0.0, 0.0, 1.0, 0], 
+        #                             [0, 0, 0, 1.0]])
+        topdown_intrinsics = np.array([[548.993771650447, 0.0, 256.0, 0], 
+                                    [0.0, 548.993771650447, 256.0, 0], 
+                                    [0.0, 0.0, 1.0, 0], 
+                                    [0, 0, 0, 1.0]])    # 分辨率为512x512
+        coor2topdown = np.dot(topdown_intrinsics, coor2topdown)
+
+        img = raw_img.copy()        
+        pts_4d = np.stack([line[:,0],line[:,1],np.zeros(line.shape[0]),np.ones(line.shape[0])])
+        pts_2d = (coor2topdown @ pts_4d).T
+        pts_2d[:, 0] /= pts_2d[:, 2]
+        pts_2d[:, 1] /= pts_2d[:, 2]
+        mask = (pts_2d[:, 0]>0) & (pts_2d[:, 0]<canvas_size[1]) & (pts_2d[:, 1]>0) & (pts_2d[:, 1]<canvas_size[0])
+        if not mask.any():
+            return img
         
-    #     # draw raw points
-    #     pts_2d = pts_2d[mask,0:2]
-    #     for i in range(pts_2d.shape[0]):
-    #         # rgb_color_tuple = (51, 136, 255) # 亮绿色
-    #         if pts_2d[i,0]>0 and pts_2d[i,0]<canvas_size[1] and pts_2d[i,1]>0 and pts_2d[i,1]<canvas_size[0]:
-    #             cv2.circle(img,(int(pts_2d[i,0]),int(pts_2d[i,1])),radius=4,color=rgb_color_tuple, thickness=thickness)   
-    #         elif i==0:
-    #             break
+        # draw raw points
+        pts_2d = pts_2d[mask,0:2]
+
+        try:
+            tck, u = splprep([pts_2d[:, 0], pts_2d[:, 1]], s=5) # s控制样条曲线插值误差
+        except:
+            return img
+        unew = np.linspace(0, 1, 100)
+        smoothed_pts = np.stack(splev(unew, tck)).astype(int).T
         
-    #     legend_x, legend_y = legend_dict[type]
-    #     throttle = f'throttle:{meta["throttle"]:.2f}'
-    #     brake = f'brake:{meta["brake"]:.2f}'
-    #     cv2.circle(img, (legend_x, legend_y), radius=10, color=rgb_color_tuple, thickness=thickness)
-    #     cv2.putText(img, type, (legend_x + 20, legend_y + 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1)
-    #     # cv2.putText(img, throttle, (200, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-    #     # cv2.putText(img, brake, (200, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-
-
-    #     # draw line from smoothed points
-    #     try:
-    #         tck, u = splprep([pts_2d[:, 0], pts_2d[:, 1]], s=0)
-    #     except:
-    #         return img
-    #     unew = np.linspace(0, 1, 100)
-    #     smoothed_pts = np.stack(splev(unew, tck)).astype(int).T
-
-    #     num_points = len(smoothed_pts)
-    #     for i in range(num_points-1):
-    #         if smoothed_pts[i,0]>0 and smoothed_pts[i,0]<canvas_size[1] and smoothed_pts[i,1]>0 and smoothed_pts[i,1]<canvas_size[0]:
-    #             cv2.line(img,(smoothed_pts[i,0],smoothed_pts[i,1]),(smoothed_pts[i+1,0],smoothed_pts[i+1,1]),color=rgb_color_tuple, thickness=thickness)   
-    #         elif i==0:
-    #             break
-    #     return img
+        num_points = len(smoothed_pts)
+        for i in range(num_points-1):
+            hue = hue_start + (hue_end - hue_start) * (i / num_points)
+            hsv_color = np.array([hue, 255, 255], dtype=np.uint8)
+            rgb_color = cv2.cvtColor(hsv_color[np.newaxis, np.newaxis, :], cv2.COLOR_HSV2RGB).reshape(-1)
+            rgb_color_tuple = (float(rgb_color[0]),float(rgb_color[1]),float(rgb_color[2]))
+            cv2.line(img,(smoothed_pts[i,0],smoothed_pts[i,1]),(smoothed_pts[i+1,0],smoothed_pts[i+1,1]),color=rgb_color_tuple, thickness=thickness)  
+        
+        return img
 
     def create_video(self, fps=2, show_navi=False):
         # 检测什么时候car block
@@ -347,8 +322,8 @@ class AblationAgent():
             frame_img2 = cv2.imread(os.path.join(self.scenario_path, 'rgb_front', image_idx))
 
             # frame_img1
-            frame_img1 = self.draw_traj_bev(meta, frame_img1, is_ego=True, type='pred')
-            # frame_img1 = self.draw_traj_bev(meta, frame_img1, is_ego=True, type='navi')
+            frame_img1 = self.draw_spline_bev(meta, frame_img1, is_ego=True, type='pred')
+            frame_img1 = self.draw_traj_bev(meta, frame_img1, is_ego=True, type='navi')
 
             # img2长宽各缩小2倍, 添加文字
             frame_img2 = cv2.resize(frame_img2, (int(frame_img2.shape[:2][1]/2), int(frame_img2.shape[:2][0]/2)))
@@ -493,7 +468,7 @@ model_path = '/data/huazh/Bench2Drive/LLava-Next-Nuscenes/checkpoints/encoder-qu
 model_name = 'llava_qwen_1_5-0.5B'
 torch_dtype = 'bf16'
 attn_implementation="sdpa"
-scenario_path = '/data42/huazh/Bench2Drive/Bench2Drive/eval_output/Dev10_padding0.5/checkpoint-25683/Dev10_RouteScenario_26405_rep0_Town15_StaticCutIn_1_0_11_19_14_01_08'
+scenario_path = '/data/huazh/Bench2Drive/Bench2Drive/eval_output/padding-road0.5-dropout0.4_qwen/checkpoint-22014/bench2drive220_5_qwen_traj_RouteScenario_24795_rep0_Town04_ConstructionObstacle_1_0_11_26_16_01_30'
 
 agent = AblationAgent(model_path, model_name, torch_dtype, attn_implementation, scenario_path)
 
@@ -516,7 +491,8 @@ idx = 63
 # print('result: \n', np.mean(result, axis=0))
 
 agent.create_video()
-# path = '/data42/huazh/Bench2Drive/Bench2Drive/eval_output/Dev10_padding0.5/checkpoint-25683'
+
+# path = '/data/huazh/Bench2Drive/Bench2Drive/eval_output/Dev10_road0.5-dropout0.4/checkpoint-22014'
 # scenarios = os.listdir(path)
 
 # for scenario in scenarios:
