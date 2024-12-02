@@ -240,7 +240,7 @@ def read_from_json(filepath, metric_dir=None):
     all_data = []
     driving_efficiency = []
     for record in data["_checkpoint"]["records"]:
-        filepath = os.path.join(metric_dir, record["save_name"], 'metric_info.json')
+        filepath = os.path.join(metric_dir, 'Dev10_'+record["save_name"], 'metric_info.json')
         temp_dict = {}
         temp_dict["acceleration"] = []
         temp_dict["angular_velocity"] = []
